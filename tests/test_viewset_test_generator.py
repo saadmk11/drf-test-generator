@@ -329,3 +329,21 @@ def test_viewset_test_generator_with_test_base_class_from_import():
             router, test_base_class="tests.base.CustomAPITestCase"
         ).run()
         assert str(generated_tests.getvalue()) == expected_tests
+
+
+def test_viewset_test_generator_with_empty_viewset():
+    class FirstViewSet(viewsets.GenericViewSet):
+        ...
+
+    router = routers.DefaultRouter()
+    router.register("first", FirstViewSet, basename="first")
+
+    expected_tests = textwrap.dedent(
+        """\
+        No tests generated.
+        """
+    )
+
+    with redirect_stdout(StringIO()) as generated_tests:
+        ViewSetTestGenerator(router).run()
+        assert str(generated_tests.getvalue()) == expected_tests

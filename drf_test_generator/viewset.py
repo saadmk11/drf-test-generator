@@ -187,12 +187,13 @@ class ViewSetTestGenerator:
         return tests
 
     def _write_generated_tests_to_file(self, tests: List[str]) -> None:
-        if self.output_file:
-            with open(self.output_file, "a") as f:
-                f.write(self._get_import_string())
+        assert self.output_file
 
-                for test in tests:
-                    f.write(test)
+        with open(self.output_file, "a") as f:
+            f.write(self._get_import_string())
+
+            for test in tests:
+                f.write(test)
 
     def _print_generated_tests(self, tests: List[str]) -> None:
         print(self._get_import_string(), end="")
@@ -202,6 +203,10 @@ class ViewSetTestGenerator:
 
     def run(self) -> None:
         tests = self._generate_tests()
+
+        if not tests:
+            print("No tests generated.")
+            return
 
         if self.output_file:
             self._write_generated_tests_to_file(tests)
