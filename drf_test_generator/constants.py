@@ -1,4 +1,6 @@
-HTTP_METHOD_STATUS_CODE_MAP: dict[str, str] = {
+from typing import Dict
+
+HTTP_METHOD_STATUS_CODE_MAP: Dict[str, str] = {
     "head": "status.HTTP_200_OK",
     "options": "status.HTTP_200_OK",
     "get": "status.HTTP_200_OK",

@@ -2,7 +2,7 @@ import dataclasses
 import re
 import textwrap
 from functools import lru_cache
-from typing import Optional
+from typing import Dict, List, Optional
 
 from rest_framework.routers import SimpleRouter
 from rest_framework.viewsets import ViewSetMixin
@@ -15,8 +15,8 @@ class ViewSetURLData:
     """Dataclass to hold information about a viewset URL."""
 
     name: str
-    lookup_dict: dict[str, None] = dataclasses.field(default_factory=dict)
-    method_map: dict[str, str] = dataclasses.field(default_factory=dict)
+    lookup_dict: Dict[str, None] = dataclasses.field(default_factory=dict)
+    method_map: Dict[str, str] = dataclasses.field(default_factory=dict)
 
 
 @dataclasses.dataclass
@@ -25,7 +25,7 @@ class ViewSetData:
 
     name: str
     basename: str
-    urls: list[ViewSetURLData] = dataclasses.field(default_factory=list)
+    urls: List[ViewSetURLData] = dataclasses.field(default_factory=list)
 
     def __init__(
         self, router: SimpleRouter, prefix: str, viewset: ViewSetMixin, basename: str
@@ -90,7 +90,7 @@ class ViewSetTestGenerator:
         test_base_class: Optional[str] = None,
         namespace: Optional[str] = None,
         output_file: Optional[str] = None,
-        selected_viewsets: Optional[list[str]] = None,
+        selected_viewsets: Optional[List[str]] = None,
     ) -> None:
         self.router = router
         self.output_file = output_file
@@ -117,7 +117,7 @@ class ViewSetTestGenerator:
         return f"test_{basename}_{action_name}_{http_method}"
 
     def _build_reverse(
-        self, url_name: str, lookup_dict: Optional[dict[str, None]]
+        self, url_name: str, lookup_dict: Optional[Dict[str, None]]
     ) -> str:
         nemspace = f"{self.namespace}:" if self.namespace else ""
         return (
@@ -140,7 +140,7 @@ class ViewSetTestGenerator:
             """
         )
 
-    def _generate_viewset_data_from_router(self) -> list[ViewSetData]:
+    def _generate_viewset_data_from_router(self) -> List[ViewSetData]:
         data = []
 
         for prefix, viewset, basename in self.router.registry:
@@ -180,13 +180,13 @@ class ViewSetTestGenerator:
 
         return tests
 
-    def _generate_tests(self) -> list[str]:
+    def _generate_tests(self) -> List[str]:
         tests = []
         for viewset_data in self._generate_viewset_data_from_router():
             tests.append(self._generate_tests_for_viewset(viewset_data))
         return tests
 
-    def _write_generated_tests_to_file(self, tests: list[str]) -> None:
+    def _write_generated_tests_to_file(self, tests: List[str]) -> None:
         if self.output_file:
             with open(self.output_file, "a") as f:
                 f.write(self._get_import_string())
@@ -194,7 +194,7 @@ class ViewSetTestGenerator:
                 for test in tests:
                     f.write(test)
 
-    def _print_generated_tests(self, tests: list[str]) -> None:
+    def _print_generated_tests(self, tests: List[str]) -> None:
         print(self._get_import_string(), end="")
 
         for test in tests:
