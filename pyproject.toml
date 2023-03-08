@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[tool.pytest.ini_options]
+addopts = "--ds=tests.settings --cov=drf_test_generator --cov-report=xml"
+django_find_project = false
+
+[tool.black]
+target-version = ['py37']
+
+[tool.isort]
+profile = "black"
+
+[tool.mypy]
+mypy_path = "drf_test_generator/"
+check_untyped_defs = true
+warn_unreachable = true
+warn_unused_ignores = true
+show_error_codes = true
+disallow_any_generics = true
+disallow_incomplete_defs = true
+disallow_untyped_defs = true
+no_implicit_optional = true
+
+[[tool.mypy.overrides]]
+module = "tests.*"
+allow_untyped_defs = true

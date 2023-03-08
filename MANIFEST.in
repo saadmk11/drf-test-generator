@@ -1,0 +1,10 @@
+include CHANGELOG.md
+include README.md
+include LICENSE
+include pyproject.toml
+include drf_test_generator/py.typed
+
+recursive-include drf_test_generator *
+
+global-exclude __pycache__
+global-exclude *.py[co]
