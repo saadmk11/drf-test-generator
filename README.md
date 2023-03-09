@@ -20,6 +20,12 @@ It can generate both `unittest` and `pytest` Style tests for all `ViewSets` in a
 - Generates tests for all `HTTP` methods in a `ViewSet`
 - Supports test generation for both `pytest` and `unittest`
 
+# Requirements
+
+- Python 3.7+
+- Django 3.2+
+- Django REST Framework 3.12+
+
 # Installation
 
 ```console
