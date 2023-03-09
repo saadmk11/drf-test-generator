@@ -1,6 +1,17 @@
 # drf-test-generator
 
-This is a Django Package that generates basic tests for Django REST Framework.
+[![Pypi Version](https://img.shields.io/pypi/v/drf-test-generator.svg?style=flat-square)](https://pypi.org/project/drf-test-generator/)
+[![Supported Python Versions](https://img.shields.io/pypi/pyversions/drf-test-generator?style=flat-square)](https://pypi.org/project/drf-test-generator/)
+[![Supported Django Versions](https://img.shields.io/pypi/frameworkversions/django/drf-test-generator?color=darkgreen&style=flat-square)](https://pypi.org/project/drf-test-generator/)
+[![License](https://img.shields.io/github/license/saadmk11/drf-test-generator?style=flat-square)](https://github.com/saadmk11/drf-test-generator/blob/main/LICENSE)
+
+![Django Tests](https://img.shields.io/github/actions/workflow/status/saadmk11/drf-test-generator/test.yaml?style=flat-square)
+![Codecov](https://img.shields.io/codecov/c/github/saadmk11/drf-test-generator?style=flat-square&token=ugjHXbEKib)
+![pre-commit.ci](https://img.shields.io/badge/pre--commit.ci-enabled-brightgreen?logo=pre-commit&logoColor=white&style=flat-square)
+![Code Style](https://img.shields.io/badge/Code%20Style-Black-black?style=flat-square)
+
+A Django Package that generates basic tests for Django REST Framework.
+It can generate both `unittest` and `pytest` Style tests for all `ViewSets` in a Django REST Framework `router`.
 
 # Features
 
