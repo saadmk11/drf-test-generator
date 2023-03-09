@@ -2,11 +2,11 @@
 
 This is a Django Package that generates basic tests for Django REST Framework.
 
-# Current Features
+# Features
 
-- Generates tests for all ViewSets in a Django REST Framework router
-- Generates tests for all custom actions in a ViewSet
-- Generates tests for all HTTP methods in a ViewSet
+- Generates tests for all `ViewSets` in a Django REST Framework `router`
+- Generates tests for all custom `actions` in a `ViewSet`
+- Generates tests for all `HTTP` methods in a `ViewSet`
 - Supports test generation for both `pytest` and `unittest`
 
 # Installation
@@ -90,9 +90,9 @@ A list of pytest fixtures to add to the generated tests. If not provided, only t
 
 **Example:** `--pytest-fixtures django_user_model`
 
-## Examples Usage
+# Examples Usage
 
-### For the following code
+## For the following code
 
 ```python
 # api/views.py
@@ -120,7 +120,7 @@ router = routers.DefaultRouter()
 router.register("posts", PostViewSet, basename="post")
 ```
 
-### For Unittest
+## For Unittest
 
 **Run Command**
 
@@ -195,7 +195,7 @@ class PostViewSetTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 ```
 
-### For Pytest
+## For Pytest
 
 **Run Command**
 
