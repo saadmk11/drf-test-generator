@@ -1,10 +1,10 @@
 # drf-test-generator
 
-This is a Django Package that generates basic tests for Django Rest Framework.
+This is a Django Package that generates basic tests for Django REST Framework.
 
 # Current Features
 
-- Generates tests for all ViewSets in a Django Rest Framework router
+- Generates tests for all ViewSets in a Django REST Framework router
 - Generates tests for all custom actions in a ViewSet
 - Generates tests for all HTTP methods in a ViewSet
 - Supports test generation for both `pytest` and `unittest`
@@ -32,55 +32,59 @@ INSTALLED_APPS = [
 
 ## Django Management Command
 
+You can generate tests using the Django Management Command:
+
 ```console
 python manage.py generate_viewset_tests -r api.urls.router
 ```
 
-## Options
+**Note:** Currently this package only supports test generation for ViewSets that are registered in a router.
 
-**`-r`** or **`--router`**
+## Django Management Command Options
 
-The dotted path to the rest framework url router. This is the router that contains the ViewSets you want to generate tests for.
+### `-r` or `--router` (REQUIRED)
+
+The dotted path to the REST framework url router. This is the router that contains the ViewSets you want to generate tests for.
 
 **Example:** `--router api.urls.router`
 
-**`--test-base-class`**
+### `--test-base-class`
 
 The dotted path to the test base class. This is the class that your tests will inherit from. If not provided, the tests will inherit from `rest_framework.test.APITestCase`.
 
 **Example:** `--test-base-class tests.base.MyCustomTest`
 
-**`--namespace`**
+### `--namespace`
 
 The namespace to use for the URLs (e.g: `api_v1:posts-list` ). If not provided, no namespace will be used.
 
 **Example:** `--namespace api_v1`
 
-**`--output-file`**
+### `--output-file`
 
 The path to the output file. If not provided, the tests will be printed to the console.
 
 **Example:** `--output-file tests.py`
 
-**`--select-viewsets`**
+### `--select-viewsets`
 
 A list of ViewSets to generate tests for. If not provided, tests will be generated for all ViewSets in the router.
 
 **Example:** `--select-viewsets PostViewSet CommentViewSet`
 
-**`--variant`**
+### `--variant`
 
 The test variant to generate. Options: `pytest`, `unittest`. If not provided, `unittest` will be used.
 
 **Example:** `--variant pytest`
 
-**`--pytest-markers`**
+### `--pytest-markers`
 
 A list of pytest markers to add to the generated tests. If not provided, only the `@pytest.mark.django_db` marker will be added.
 
 **Example:** `--pytest-markers pytest.mark.ignore_template_errors pytest.mark.urls('myapp.test_urls')`
 
-**`--pytest-fixtures`**
+### `--pytest-fixtures`
 
 A list of pytest fixtures to add to the generated tests. If not provided, only the `client` fixture will be added.
 
@@ -88,7 +92,7 @@ A list of pytest fixtures to add to the generated tests. If not provided, only t
 
 ## Examples Usage
 
-#### For the following code
+### For the following code
 
 ```python
 # api/views.py
@@ -116,7 +120,7 @@ router = routers.DefaultRouter()
 router.register("posts", PostViewSet, basename="post")
 ```
 
-#### For Unittest
+### For Unittest
 
 **Run Command**
 
@@ -191,7 +195,7 @@ class PostViewSetTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 ```
 
-#### For Pytest
+### For Pytest
 
 **Run Command**
 
