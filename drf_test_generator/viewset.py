@@ -1,3 +1,4 @@
+import abc
 import dataclasses
 import re
 import textwrap
@@ -81,13 +82,12 @@ class TestBaseClass:
         return f"import {self.class_name}"
 
 
-class ViewSetTestGenerator:
+class ViewSetTestGeneratoBaser(abc.ABC):
     """Builds basic tests for Django Rest Framework ViewSets."""
 
     def __init__(
         self,
         router: SimpleRouter,
-        test_base_class: Optional[str] = None,
         namespace: Optional[str] = None,
         output_file: Optional[str] = None,
         selected_viewsets: Optional[List[str]] = None,
@@ -95,28 +95,26 @@ class ViewSetTestGenerator:
         self.router = router
         self.output_file = output_file
         self.namespace = namespace
-        self.test_base_class = TestBaseClass(test_base_class)
         self.selected_viewsets = selected_viewsets
 
-    @lru_cache(maxsize=7)  # noqa: B019
-    def _build_assert_statement(self, http_method: str) -> str:
-        return (
-            "self.assertEqual(response.status_code, "
-            f"{HTTP_METHOD_STATUS_CODE_MAP[http_method]})"
-        )
+    @abc.abstractmethod
+    def build_assert_statement(self, http_method: str) -> str:
+        raise NotImplementedError
 
-    @lru_cache(maxsize=7)  # noqa: B019
-    def _build_request(self, http_method: str) -> str:
-        if http_method in ["post", "put", "patch"]:
-            return f"self.client.{http_method}(url, data={{}})"
-        return f"self.client.{http_method}(url)"
+    @abc.abstractmethod
+    def build_test_method_args(self) -> str:
+        raise NotImplementedError
 
-    def _build_test_method_name(
+    @abc.abstractmethod
+    def build_request(self, http_method: str) -> str:
+        raise NotImplementedError
+
+    def build_test_method_name(
         self, basename: str, action_name: str, http_method: str
     ) -> str:
         return f"test_{basename}_{action_name}_{http_method}"
 
-    def _build_reverse(
+    def build_reverse(
         self, url_name: str, lookup_dict: Optional[Dict[str, None]]
     ) -> str:
         nemspace = f"{self.namespace}:" if self.namespace else ""
@@ -126,21 +124,16 @@ class ViewSetTestGenerator:
             else f"reverse('{nemspace}{url_name}')"
         )
 
-    def _build_test_class(self, viewset_name: str) -> str:
-        return f"\n\nclass {viewset_name}Tests({self.test_base_class.class_name}):\n"
-
-    def _get_import_string(self) -> str:
+    def get_import_string(self) -> str:
         return textwrap.dedent(
-            f"""\
+            """\
             from django.urls import reverse
 
             from rest_framework import status
-
-            {self.test_base_class.get_import_statement()}
             """
         )
 
-    def _generate_viewset_data_from_router(self) -> List[ViewSetData]:
+    def generate_viewset_data_from_router(self) -> List[ViewSetData]:
         data = []
 
         for prefix, viewset, basename in self.router.registry:
@@ -157,58 +150,171 @@ class ViewSetTestGenerator:
 
         return data
 
-    def _generate_tests_for_viewset(self, viewset_data: ViewSetData) -> str:
-        tests = self._build_test_class(viewset_data.name)
+    def build_test_method(
+        self, url: ViewSetURLData, basename: str, http_method: str, action_name: str
+    ) -> str:
+        method_name = self.build_test_method_name(basename, action_name, http_method)
+        return textwrap.dedent(
+            f"""\
+            def {method_name}({self.build_test_method_args()}):
+                url = {self.build_reverse(url.name, url.lookup_dict)}
+                response = {self.build_request(http_method)}
+                {self.build_assert_statement(http_method)}
+            """
+        )
+
+    def generate_tests_for_viewset(self, viewset_data: ViewSetData) -> str:
+        tests = ""
 
         for url in viewset_data.urls:
             for http_method, action_name in url.method_map.items():
-                test_method_name = self._build_test_method_name(
-                    viewset_data.basename, action_name, http_method
+                test_method = self.build_test_method(
+                    url, viewset_data.basename, http_method, action_name
                 )
-
-                tests += textwrap.indent(
-                    text=textwrap.dedent(
-                        f"""
-                        def {test_method_name}(self):
-                            url = {self._build_reverse(url.name, url.lookup_dict)}
-                            response = {self._build_request(http_method)}
-                            {self._build_assert_statement(http_method)}
-                        """
-                    ),
-                    prefix="    ",
-                )
+                tests += f"\n{test_method}"
 
         return tests
 
-    def _generate_tests(self) -> List[str]:
+    def generate_tests(self) -> List[str]:
         tests = []
-        for viewset_data in self._generate_viewset_data_from_router():
-            tests.append(self._generate_tests_for_viewset(viewset_data))
+        for viewset_data in self.generate_viewset_data_from_router():
+            tests.append(self.generate_tests_for_viewset(viewset_data))
         return tests
 
-    def _write_generated_tests_to_file(self, tests: List[str]) -> None:
+    def write_generated_tests_to_file(self, tests: List[str]) -> None:
         assert self.output_file
 
         with open(self.output_file, "a") as f:
-            f.write(self._get_import_string())
+            f.write(self.get_import_string())
 
             for test in tests:
                 f.write(test)
 
-    def _print_generated_tests(self, tests: List[str]) -> None:
-        print(self._get_import_string(), end="")
+    def print_generated_tests(self, tests: List[str]) -> None:
+        print(self.get_import_string(), end="")
 
         for test in tests:
             print(test, end="")
 
     def run(self) -> None:
-        tests = self._generate_tests()
+        tests = self.generate_tests()
 
         if not tests:
             print("No tests generated.")
             return
 
         if self.output_file:
-            self._write_generated_tests_to_file(tests)
+            self.write_generated_tests_to_file(tests)
         else:
-            self._print_generated_tests(tests)
+            self.print_generated_tests(tests)
+
+
+class UnitTestViewSetTestGenerator(ViewSetTestGeneratoBaser):
+    """Builds basic tests for Django Rest Framework ViewSets."""
+
+    def __init__(
+        self,
+        router: SimpleRouter,
+        test_base_class: Optional[str] = None,
+        namespace: Optional[str] = None,
+        output_file: Optional[str] = None,
+        selected_viewsets: Optional[List[str]] = None,
+    ) -> None:
+        super().__init__(router, namespace, output_file, selected_viewsets)
+        self.test_base_class = TestBaseClass(test_base_class)
+
+    @lru_cache(maxsize=7)  # noqa: B019
+    def build_assert_statement(self, http_method: str) -> str:
+        return (
+            "self.assertEqual(response.status_code, "
+            f"{HTTP_METHOD_STATUS_CODE_MAP[http_method]})"
+        )
+
+    @lru_cache(maxsize=7)  # noqa: B019
+    def build_request(self, http_method: str) -> str:
+        if http_method in ["post", "put", "patch"]:
+            return f"self.client.{http_method}(url, data={{}})"
+        return f"self.client.{http_method}(url)"
+
+    def build_test_method_args(self) -> str:
+        return "self"
+
+    def build_test_class(self, viewset_name: str) -> str:
+        return f"\n\nclass {viewset_name}Tests({self.test_base_class.class_name}):\n"
+
+    def get_import_string(self) -> str:
+        return (
+            f"{super().get_import_string()}\n"
+            f"{self.test_base_class.get_import_statement()}\n"
+        )
+
+    def generate_tests_for_viewset(self, viewset_data: ViewSetData) -> str:
+        tests = self.build_test_class(viewset_data.name)
+
+        tests += textwrap.indent(
+            text=super().generate_tests_for_viewset(viewset_data),
+            prefix="    ",
+        )
+        return tests
+
+
+class PyTestViewSetTestGenerator(ViewSetTestGeneratoBaser):
+    """Builds basic tests for Django Rest Framework ViewSets."""
+
+    def __init__(
+        self,
+        router: SimpleRouter,
+        namespace: Optional[str] = None,
+        output_file: Optional[str] = None,
+        selected_viewsets: Optional[List[str]] = None,
+        pytest_markers: Optional[List[str]] = None,
+        pytest_fixtures: Optional[List[str]] = None,
+    ) -> None:
+        super().__init__(router, namespace, output_file, selected_viewsets)
+        self.pytest_markers = pytest_markers or []
+        self.pytest_fixtures = pytest_fixtures or []
+
+    @lru_cache(maxsize=7)  # noqa: B019
+    def build_assert_statement(self, http_method: str) -> str:
+        return (
+            "assert response.status_code == "
+            f"{HTTP_METHOD_STATUS_CODE_MAP[http_method]}"
+        )
+
+    @lru_cache(maxsize=7)  # noqa: B019
+    def build_request(self, http_method: str) -> str:
+        if http_method in ["post", "put", "patch"]:
+            return f"client.{http_method}(url, data={{}})"
+        return f"client.{http_method}(url)"
+
+    def build_test_method_args(self) -> str:
+        args = ["client"]
+
+        for arg in self.pytest_fixtures:
+            args.append(arg)
+
+        return ", ".join(args)
+
+    def build_test_markers(self) -> str:
+        markers = ["@pytest.mark.django_db"]
+
+        for marker in self.pytest_markers:
+            markers.append(f"@{marker}")
+
+        return "\n".join(markers)
+
+    def get_import_string(self) -> str:
+        return f"{super().get_import_string()}\n" f"import pytest\n"
+
+    def build_test_method(
+        self, url: ViewSetURLData, basename: str, http_method: str, action_name: str
+    ) -> str:
+        return (
+            f"\n{self.build_test_markers()}\n"
+            f"{super().build_test_method(url, basename, http_method, action_name)}"
+        )
+
+    def generate_tests_for_viewset(self, viewset_data: ViewSetData) -> str:
+        tests = f"\n# {viewset_data.name} Tests\n"
+        tests += super().generate_tests_for_viewset(viewset_data)
+        return tests

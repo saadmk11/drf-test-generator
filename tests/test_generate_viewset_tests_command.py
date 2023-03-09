@@ -16,7 +16,8 @@ def test_generate_viewset_tests_command_with_no_options():
 
 
 @mock.patch(
-    "drf_test_generator.management.commands.generate_viewset_tests.ViewSetTestGenerator"
+    "drf_test_generator.management.commands."
+    "generate_viewset_tests.UnitTestViewSetTestGenerator"
 )
 def test_generate_viewset_tests_command_invalid_router(viewset_test_generator):
     with pytest.raises(CommandError) as e_info:
@@ -33,10 +34,11 @@ def test_generate_viewset_tests_command_invalid_router(viewset_test_generator):
 
 
 @mock.patch(
-    "drf_test_generator.management.commands.generate_viewset_tests.import_string"
+    "drf_test_generator.management.commands." "generate_viewset_tests.import_string"
 )
 @mock.patch(
-    "drf_test_generator.management.commands.generate_viewset_tests.ViewSetTestGenerator"
+    "drf_test_generator.management.commands."
+    "generate_viewset_tests.UnitTestViewSetTestGenerator"
 )
 def test_generate_viewset_tests_command(viewset_test_generator, import_string):
     call_command(
@@ -55,10 +57,11 @@ def test_generate_viewset_tests_command(viewset_test_generator, import_string):
 
 
 @mock.patch(
-    "drf_test_generator.management.commands.generate_viewset_tests.import_string"
+    "drf_test_generator.management.commands." "generate_viewset_tests.import_string"
 )
 @mock.patch(
-    "drf_test_generator.management.commands.generate_viewset_tests.ViewSetTestGenerator"
+    "drf_test_generator.management.commands."
+    "generate_viewset_tests.UnitTestViewSetTestGenerator"
 )
 def test_generate_viewset_tests_command_with_all_options(
     viewset_test_generator, import_string
@@ -84,4 +87,43 @@ def test_generate_viewset_tests_command_with_all_options(
         namespace="api_v1",
         output_file="tests.py",
         selected_viewsets=["PostViewSet", "CommentViewSet"],
+    )
+
+
+@mock.patch(
+    "drf_test_generator.management.commands.generate_viewset_tests.import_string"
+)
+@mock.patch(
+    "drf_test_generator.management.commands."
+    "generate_viewset_tests.PyTestViewSetTestGenerator"
+)
+def test_generate_viewset_tests_command_pytest_with_all_options(
+    pytest_viewset_test_generator, import_string
+):
+    call_command(
+        "generate_viewset_tests",
+        "-r",
+        "api.urls.router",
+        "--variant",
+        "pytest",
+        "--namespace",
+        "api_v1",
+        "--output-file",
+        "tests.py",
+        "--select-viewsets",
+        "PostViewSet",
+        "CommentViewSet",
+        "--pytest-markers",
+        "pytest.mark.urls",
+        "--pytest-fixtures",
+        "django_user_model",
+    )
+
+    pytest_viewset_test_generator.assert_called_once_with(
+        import_string.return_value,
+        namespace="api_v1",
+        output_file="tests.py",
+        selected_viewsets=["PostViewSet", "CommentViewSet"],
+        pytest_markers=["pytest.mark.urls"],
+        pytest_fixtures=["django_user_model"],
     )

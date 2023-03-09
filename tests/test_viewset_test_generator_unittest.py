@@ -6,7 +6,7 @@ from rest_framework import routers, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from drf_test_generator.viewset import ViewSetTestGenerator
+from drf_test_generator.viewset import UnitTestViewSetTestGenerator
 
 
 def test_viewset_test_generator_with_model_viewset():
@@ -60,7 +60,7 @@ def test_viewset_test_generator_with_model_viewset():
     )
 
     with redirect_stdout(StringIO()) as generated_tests:
-        ViewSetTestGenerator(router).run()
+        UnitTestViewSetTestGenerator(router).run()
         assert str(generated_tests.getvalue()) == expected_tests
 
 
@@ -111,7 +111,7 @@ def test_viewset_test_generator_with_generic_viewset():
     )
 
     with redirect_stdout(StringIO()) as generated_tests:
-        ViewSetTestGenerator(router).run()
+        UnitTestViewSetTestGenerator(router).run()
         assert str(generated_tests.getvalue()) == expected_tests
 
 
@@ -157,7 +157,7 @@ def test_viewset_test_generator_with_multiple_generic_viewset():
     )
 
     with redirect_stdout(StringIO()) as generated_tests:
-        ViewSetTestGenerator(router).run()
+        UnitTestViewSetTestGenerator(router).run()
         assert str(generated_tests.getvalue()) == expected_tests
 
 
@@ -189,7 +189,7 @@ def test_viewset_test_generator_with_app_namespace():
     )
 
     with redirect_stdout(StringIO()) as generated_tests:
-        ViewSetTestGenerator(router, namespace="api_v1").run()
+        UnitTestViewSetTestGenerator(router, namespace="api_v1").run()
         assert str(generated_tests.getvalue()) == expected_tests
 
 
@@ -227,7 +227,7 @@ def test_viewset_test_generator_with_selected_viewsets():
     )
 
     with redirect_stdout(StringIO()) as generated_tests:
-        ViewSetTestGenerator(router, selected_viewsets=["FirstViewSet"]).run()
+        UnitTestViewSetTestGenerator(router, selected_viewsets=["FirstViewSet"]).run()
         assert str(generated_tests.getvalue()) == expected_tests
 
 
@@ -261,7 +261,7 @@ def test_viewset_test_generator_with_output_file(tmpdir):
         """
     )
 
-    ViewSetTestGenerator(router, output_file=file.strpath).run()
+    UnitTestViewSetTestGenerator(router, output_file=file.strpath).run()
     assert file.read() == expected_tests
 
 
@@ -293,7 +293,7 @@ def test_viewset_test_generator_with_test_base_class():
     )
 
     with redirect_stdout(StringIO()) as generated_tests:
-        ViewSetTestGenerator(router, test_base_class="CustomAPITestCase").run()
+        UnitTestViewSetTestGenerator(router, test_base_class="CustomAPITestCase").run()
         assert str(generated_tests.getvalue()) == expected_tests
 
 
@@ -325,7 +325,7 @@ def test_viewset_test_generator_with_test_base_class_from_import():
     )
 
     with redirect_stdout(StringIO()) as generated_tests:
-        ViewSetTestGenerator(
+        UnitTestViewSetTestGenerator(
             router, test_base_class="tests.base.CustomAPITestCase"
         ).run()
         assert str(generated_tests.getvalue()) == expected_tests
@@ -345,5 +345,5 @@ def test_viewset_test_generator_with_empty_viewset():
     )
 
     with redirect_stdout(StringIO()) as generated_tests:
-        ViewSetTestGenerator(router).run()
+        UnitTestViewSetTestGenerator(router).run()
         assert str(generated_tests.getvalue()) == expected_tests

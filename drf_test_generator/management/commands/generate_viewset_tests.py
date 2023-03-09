@@ -4,7 +4,10 @@ from typing import Any
 from django.core.management.base import BaseCommand, CommandError
 from django.utils.module_loading import import_string
 
-from drf_test_generator.viewset import ViewSetTestGenerator
+from drf_test_generator.viewset import (
+    PyTestViewSetTestGenerator,
+    UnitTestViewSetTestGenerator,
+)
 
 
 class Command(BaseCommand):
@@ -51,6 +54,32 @@ class Command(BaseCommand):
                 "Example: PostViewSet CommentViewSet"
             ),
         )
+        parser.add_argument(
+            "--variant",
+            nargs="?",
+            type=str,
+            choices=["pytest", "unittest"],
+            default="unittest",
+            help="Test variant to generate. Options: pytest, unittest",
+        )
+        parser.add_argument(
+            "--pytest-markers",
+            nargs="*",
+            type=str,
+            help=(
+                "List of pytest markers to add to the generated tests. "
+                "Example: pytest.mark.urls"
+            ),
+        )
+        parser.add_argument(
+            "--pytest-fixtures",
+            nargs="*",
+            type=str,
+            help=(
+                "List of pytest fixtures to add to the generated tests. "
+                "Example: django_user_model"
+            ),
+        )
 
     def handle(self, *args: Any, **options: Any) -> None:
         try:
@@ -61,10 +90,20 @@ class Command(BaseCommand):
                 "Check that the dotted path is correct."
             )
 
-        ViewSetTestGenerator(
-            router,
-            test_base_class=options["test_base_class"],
-            namespace=options["namespace"],
-            output_file=options["output_file"],
-            selected_viewsets=options["select_viewsets"],
-        ).run()
+        if options["variant"] == "pytest":
+            PyTestViewSetTestGenerator(
+                router,
+                namespace=options["namespace"],
+                output_file=options["output_file"],
+                selected_viewsets=options["select_viewsets"],
+                pytest_markers=options["pytest_markers"],
+                pytest_fixtures=options["pytest_fixtures"],
+            ).run()
+        else:
+            UnitTestViewSetTestGenerator(
+                router,
+                test_base_class=options["test_base_class"],
+                namespace=options["namespace"],
+                output_file=options["output_file"],
+                selected_viewsets=options["select_viewsets"],
+            ).run()
