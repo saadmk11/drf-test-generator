@@ -68,7 +68,7 @@ class Command(BaseCommand):
             type=str,
             help=(
                 "List of pytest markers to add to the generated tests. "
-                "Example: pytest.mark.urls"
+                "Example: pytest.mark.ignore_template_errors"
             ),
         )
         parser.add_argument(
