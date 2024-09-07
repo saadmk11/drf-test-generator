@@ -14,7 +14,7 @@ def test_viewset_test_generator_with_model_viewset():
         ...
 
     router = routers.DefaultRouter()
-    router.register("posts", PostViewSet, basename="post")
+    router.register("posts", PostViewSet, basename="blog-post")
 
     expected_tests = textwrap.dedent(
         """\
@@ -28,43 +28,43 @@ def test_viewset_test_generator_with_model_viewset():
 
 
         @pytest.mark.django_db
-        def test_post_list_get(client):
-            url = reverse('post-list')
+        def test_blog_post_list_get(client):
+            url = reverse('blog-post-list')
             response = client.get(url)
             assert response.status_code == status.HTTP_200_OK
 
 
         @pytest.mark.django_db
-        def test_post_create_post(client):
-            url = reverse('post-list')
+        def test_blog_post_create_post(client):
+            url = reverse('blog-post-list')
             response = client.post(url, data={})
             assert response.status_code == status.HTTP_201_CREATED
 
 
         @pytest.mark.django_db
-        def test_post_retrieve_get(client):
-            url = reverse('post-detail', kwargs={'pk': None})
+        def test_blog_post_retrieve_get(client):
+            url = reverse('blog-post-detail', kwargs={'pk': None})
             response = client.get(url)
             assert response.status_code == status.HTTP_200_OK
 
 
         @pytest.mark.django_db
-        def test_post_update_put(client):
-            url = reverse('post-detail', kwargs={'pk': None})
+        def test_blog_post_update_put(client):
+            url = reverse('blog-post-detail', kwargs={'pk': None})
             response = client.put(url, data={})
             assert response.status_code == status.HTTP_200_OK
 
 
         @pytest.mark.django_db
-        def test_post_partial_update_patch(client):
-            url = reverse('post-detail', kwargs={'pk': None})
+        def test_blog_post_partial_update_patch(client):
+            url = reverse('blog-post-detail', kwargs={'pk': None})
             response = client.patch(url, data={})
             assert response.status_code == status.HTTP_200_OK
 
 
         @pytest.mark.django_db
-        def test_post_destroy_delete(client):
-            url = reverse('post-detail', kwargs={'pk': None})
+        def test_blog_post_destroy_delete(client):
+            url = reverse('blog-post-detail', kwargs={'pk': None})
             response = client.delete(url)
             assert response.status_code == status.HTTP_204_NO_CONTENT
     """
