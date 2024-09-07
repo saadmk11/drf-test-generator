@@ -112,6 +112,7 @@ class ViewSetTestGeneratoBaser(abc.ABC):
     def build_test_method_name(
         self, basename: str, action_name: str, http_method: str
     ) -> str:
+        basename = basename.replace("-", "_")
         return f"test_{basename}_{action_name}_{http_method}"
 
     def build_reverse(
