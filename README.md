@@ -22,8 +22,8 @@ It can generate both `unittest` and `pytest` Style tests for all `ViewSets` in a
 
 # Requirements
 
-- Python 3.7+
-- Django 3.2+
+- Python 3.8+
+- Django 4.2+
 - Django REST Framework 3.12+
 
 # Installation
